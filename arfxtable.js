@@ -2,7 +2,7 @@
  * Arfxtable is a vanilla js version of JQuery Datatable that support rowspan on tbody
  * @author {Nur Arief HS}
  */
-class Arfxtable {
+ class Arfxtable {
     constructor(sourceProps = {}) {
 
         /**
@@ -241,7 +241,8 @@ class Arfxtable {
                             }
                         }
 
-                        td.innerHTML = vv[i] ?? '';
+                        // td.innerHTML = vv[i] ?? '';
+                        td.innerHTML = typeof vv[i] != 'undefined' ? vv[i] : '';
                         tr.appendChild(td);
                     } else {
                         if (i == 0) {
@@ -256,7 +257,8 @@ class Arfxtable {
                             }
 
                             td.setAttribute('rowspan', highest);
-                            td.innerHTML = vv ?? '';
+                            // td.innerHTML = vv ?? '';
+                            td.innerHTML = typeof vv != 'undefined' ? vv : '';
                             tr.appendChild(td);
                         }
                     }
