@@ -1,0 +1,51 @@
+{
+    "data": [
+        [
+            "<div data-id=\"1\">Nur Arief<\/div>",
+            "Ayah",
+            [
+                "Nasi Goreng",
+                "Bakso",
+                "Nasi Padang"
+            ],
+            [
+                "Maen Game"
+            ],
+            34
+        ],
+        [
+            "<div data-id=\"2\">Dyah Wulan<\/div>",
+            "Bunda",
+            [
+                "Roti Coklat",
+                "Mie Ayam",
+                "Pecel Lele",
+                "Es Teh"
+            ],
+            [
+                "Ngambek",
+                "Bebersih"
+            ],
+            27
+        ],
+        [
+            "<div data-id=\"3\">Moka<\/div>",
+            "Anak Sholehah",
+            [
+                "Nenen",
+                "Pecel Lele",
+                "Telur Ceplok"
+            ],
+            [
+                "Nenen",
+                "Nangis",
+                "Tidur",
+                "Senyum",
+                "Ngelawak"
+            ],
+            "<button class=\"btn btn-primary\">1<\/button>"
+        ]
+    ],
+    "recordsFiltered": 1000,
+    "recordsTotal": 1000
+}
