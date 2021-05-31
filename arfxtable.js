@@ -110,6 +110,12 @@
         }
 
         /**
+         * Data for dataset
+         * @type {Array<Object>}
+         */
+        this.dataset = [];
+
+        /**
          * @typedef columns
          * @type {Object}
          * @property {number} target - Index number of column target left to right.
@@ -130,10 +136,22 @@
         this.loaderAsset = this.loaderDefault();
 
         /**
-         * If not false get data attribute from given order number <td> then pass to parent <tr>
-         * @type {number | boolean}
+         * If true, add data attribute inside row.
+         * @type {boolean}
          */
         this.trData = false;
+
+        /**
+         * Records filtered
+         * @type {number}
+         */
+        this.recordsFiltered = 0;
+
+        /**
+         * Data Length 
+         * @type {number}
+         */
+        this.dataLength = 0;
 
         let props = Object.assign(this, sourceProps);
         Object.keys(props).map(v => {
@@ -189,6 +207,8 @@
             .then(res => res.json())
             .then(res => {
                 _res = res;
+                this.dataLength = res.data.length;
+                this.dataset = res.dataset;
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -196,6 +216,7 @@
 
         let _data = _res.data;
         this.res = _res;
+        this.recordsFiltered = _res.recordsFiltered;
 
         //Build table 
         // let thead = document.querySelector(`${this.target} thead`);
@@ -208,7 +229,7 @@
             columns[v.target] = v;
         })
 
-        _data.map(v => {
+        _data.map((v, index) => {
             let highest = 1;
             v.map(vv => {
                 let isArray = Array.isArray(vv);
@@ -217,13 +238,17 @@
 
             for (let i = 0; i < highest; i++) {
                 let tr = document.createElement('tr');
-                let dataset = null;
-                if (this.trData !== false) {
-                    let div = document.createElement('div');
-                    div.innerHTML = v[this.trData];
-                    dataset = div.children[0].dataset;
-                    Object.keys(dataset).map(vv => {
-                        tr.setAttribute(`data-${vv}`, dataset[vv]);
+                if (this.trData === true && this.dataLength > 0) {
+                    Object.keys(this.dataset[index]).map(vv => {
+
+                        let isArray = Array.isArray(this.dataset[index][vv]);
+
+                        if(isArray) {
+                            tr.setAttribute(`data-${vv}`, this.dataset[index][vv][i]);
+                        } else {
+                            tr.setAttribute(`data-${vv}`, this.dataset[index][vv]);
+                        }
+
                     })
                 }
 
@@ -268,6 +293,10 @@
 
         })
 
+        if (_data.length == 0) {
+            this.dataLength = 0;
+        }
+
         this.pagination && this.buildPagination();
         this.highlight && this.buildHighlight();
         this.loader(false);
@@ -279,6 +308,17 @@
      * @returns {void}
      */
     reload() {
+        this.loader(true);
+        this.start = 0;
+        this.build();
+    }
+
+    /**
+     * Refresh data without lose your track.
+     * @type {Function}
+     * @returns {void}
+     */
+    refresh() {
         this.loader(true);
         this.build();
     }
@@ -370,14 +410,17 @@
         let div = document.createElement('div');
         div.setAttribute('id', 'arfxtable_pagination');
         div.setAttribute('style', `
-            text-align: right;
+            display: flex;
+            justify-content: space-between;
         `);
+        let divInfo = document.createElement('div');
+        div.innerHTML = this.infoPagination();
         let ul = document.createElement('ul');
         div.appendChild(ul);
         let prevLi = document.createElement('li');
         prevLi.setAttribute('data-page', parseInt(this.currentPage) - 1);
 
-        if (this.currentPage == 1) {
+        if (this.currentPage == 1 || this.dataLength == 0) {
             prevLi.setAttribute('style', `
             ${styleLi}
             margin-right: 10px;
@@ -482,7 +525,7 @@
         let nextLi = document.createElement('li');
         nextLi.setAttribute('data-page', parseInt(this.currentPage) + 1);
 
-        if (this.currentPage == totalPage) {
+        if (this.currentPage == totalPage || this.dataLength == 0) {
             nextLi.setAttribute('style', `
             ${styleLi}
             margin-left: 10px;
@@ -538,6 +581,17 @@
             }
         )
 
+    }
+
+    /**
+     * Show pagination info
+     * @type {Function}
+     * @return {string}
+     */
+    infoPagination() {
+        let start = this.recordsFiltered == 0 ? 0 : parseInt(this.start) + 1;
+        let end = this.recordsFiltered > parseInt(this.start) + parseInt(this.pageLength) ? parseInt(this.start) + parseInt(this.pageLength) : this.recordsFiltered;
+        return ` Menampilkan ${start} sampai ${end} dari ${this.recordsFiltered} data `;
     }
 
     /**
@@ -604,6 +658,7 @@
             self.delay(function (e) {
                 self.loader(true);
                 this.searchValue = selfSearch.value;
+                this.start = 0;
                 this.build();
             }, self.searchDelay)
         })
@@ -620,10 +675,10 @@
         if (self.searchValue == '') return;
         let tr = document.querySelectorAll(`${this.target} tbody tr td`);
         tr.forEach(function (el, i) {
-            let searchValue = new RegExp(`(${self.searchValue})`, 'ig');
+            // let searchValue = new RegExp(`(${self.searchValue})`, 'ig');
+            let searchValue = new RegExp(`(${self.searchValue})(?!([^<]+)?>)`, 'ig');
             el.innerHTML = el.innerHTML.replaceAll(searchValue, `<span style="padding: 0.2em; background: ${self.highlightOptions.background}; color: ${self.highlightOptions.color};">$1</span>`);
         })
-
     }
 
     /**
@@ -659,8 +714,6 @@
         div.setAttribute('id', `arfxtable_element_${this.totalElement}`);
         div.classList.add(`arfxtable_${position}`);
         div.innerHTML = element();
-
-        log('element:', position, element)
 
         let container = document.querySelector(`#arfxtable_${position}_container`);
         container.append(div);
