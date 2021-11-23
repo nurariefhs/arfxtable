@@ -190,8 +190,13 @@
          * @type {?Object}
          */
         let _res = null
+
+        // Checking URL
+        let method = this.url.split('/').pop().split('.').length > 1 ? 'GET' : 'POST';
+        
+
         await fetch(this.url, {
-            method: 'POST',
+            method: method,
             mode: 'cors',
             cache: 'no-cache',
             credentials: 'same-origin',
@@ -201,8 +206,7 @@
             },
             redirect: 'follow',
             referrerPolicy: 'no-referrer',
-            // body: JSON.stringify(this.generateData())
-            body: this.generateData()
+            body: method == 'POST' ? JSON.stringify(this.generateData()): null
         })
             .then(res => res.json())
             .then(res => {
