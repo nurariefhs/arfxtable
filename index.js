@@ -347,6 +347,7 @@
      * @returns {void}
      */
     buildLoader() {
+        if(document.getElementById('arfxtableLoader')) document.getElementById('arfxtableLoader').remove();
         let body = document.querySelector('body');
         let bg = document.createElement('div');
         bg.setAttribute('id', 'arfxtableLoader');
